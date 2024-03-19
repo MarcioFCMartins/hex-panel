@@ -1,29 +1,25 @@
 # Hexagon wall panel
 Márcio Martins
 
-# Hexagon wall panel
 
-Everyone knows that hexagons are the bestagons. So, why not incorporate
-them in your house decor?
-
-In this project, I document the process of painting a hexagon wall
+Everyone knows that hexagons are the bestagons. In this project, I document the process of painting a hexagon wall
 panel, from the planning to execution.
 
 ## 1. Goal
 
 I want to paint one of my walls green, but not the entire wall. I want
 it to start with solid green and then transition to white. The
-transition will by having an increasing number of white hexagons, until
+transition will happen by having an increasing number of white hexagons, until
 it transitions entirely to white.
 
 The wall to be painted is 223 cm high and 400 cm wide. Here are the main
 rules I decided on:
 
-1.  I want to simulate panels based on a matrix of probabilities. Each
+1.  I want to create the final panel by simulation. I will simulate the panels bu creating a matrix where each
     cell will hold the probability of a hexagon being green.
-2.  I want these hexagons to be 20 cm wide, but if the hexagon is in a
-    border, it should be 19, to leave a gap between the isolated
-    hexagons and the solid parts of the panel.
+2.  I want these hexagons to be 20 cm wide.
+3.  If an hexagon is in the edge of a green patch (i.e. it has a certain number of white neighbours), its diameter should be 19.
+    I think this will make the panel more interesting looking.
 
 ## 2. Implementation
 
@@ -31,14 +27,10 @@ rules I decided on:
 
 I will not go too in depth into this section, but will instead refer you
 to the [red blob games
-post](https://www.redblobgames.com/grids/hexagons/) I used to create the
-functions I will use. It’s a great post, and I highly recommend it.
+post](https://www.redblobgames.com/grids/hexagons/) that I used to understand
+the coordinate system for a hexagonal grid. It’s a great post, and I highly recommend it.
 
 If you wish to see the code, you can find it in the `generator.R` file.
-
-I want the hexagon panel grids to be automatically generated. I will
-create a matrix of 0s and 1s. Then, I will use this matrix to draw the
-hexagons (0 = white hexagon; 1 = green hexagon).
 
 ### 2.2 Coloring probability matrix
 
@@ -88,9 +80,9 @@ draw_panel(wall, 10)
 
 ![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
 
-It’s not bad at all! But I want to add some randomness to it. To do so,
-I will use the **perlin noise** algorithm to increase the variability of
-the panel. This algorithm generates a matrix of spatially correlated
+It’s not bad at all! But I want to add some "organic" look to it. To do so,
+I will use the **perlin noise** algorithm to add additional variation to the hexagon distribution. 
+This algorithm generates a matrix of spatially correlated
 random numbers. This means that the probability matrix will have some
 terrain-like properties, and there will be “spots” where the probability
 of coloring is higher than others.
