@@ -26,7 +26,7 @@ modified_logistic <- function(x, x0, k) {
 create_matrix_binom <- function(noise, gradient, gain = 0.5, seed = 13){
         
     for(i in 1:ncol(noise)) {
-        noise[, i] <- noise[, i] + horizontal_grad[i] + gain
+        noise[, i] <- noise[, i] + gradient[i] + gain
     }
     
     noise[noise > 1] <- 1 

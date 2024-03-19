@@ -1,25 +1,30 @@
 # Hexagon wall panel
 Márcio Martins
 
+# Hexagon wall panel
 
-Everyone knows that hexagons are the bestagons. In this project, I document the process of painting a hexagon wall
-panel, from the planning to execution.
+Everyone knows that hexagons are the bestagons. In this project, I
+document the process of painting a hexagon wall panel, from the planning
+to execution.
 
 ## 1. Goal
 
-I want to paint one of my walls green, but not the entire wall. I want
-it to start with solid green and then transition to white. The
-transition will happen by having an increasing number of white hexagons, until
-it transitions entirely to white.
+Paint a wall panel, where it transitions from with solid green to white,
+via an increasing number of white hexagons.
 
 The wall to be painted is 223 cm high and 400 cm wide. Here are the main
 rules I decided on:
 
-1.  I want to create the final panel by simulation. I will simulate the panels bu creating a matrix where each
+1.  I want to simulate panels based on a matrix of probabilities. Each
     cell will hold the probability of a hexagon being green.
 2.  I want these hexagons to be 20 cm wide.
-3.  If an hexagon is in the edge of a green patch (i.e. it has a certain number of white neighbours), its diameter should be 19.
-    I think this will make the panel more interesting looking.
+3.  However, if an hexagon is in the edge between a green and a white
+    patch, it should have a diameter of 19 cm, to ease the transition.
+    These edge hexagons will be defined by counting the number of white
+    neighbours. If the number of white neighbours is greater than 3, the
+    hexagon will be smaller.
+4.  This code should allow to me programatically generate several
+    panels.
 
 ## 2. Implementation
 
@@ -27,8 +32,9 @@ rules I decided on:
 
 I will not go too in depth into this section, but will instead refer you
 to the [red blob games
-post](https://www.redblobgames.com/grids/hexagons/) that I used to understand
-the coordinate system for a hexagonal grid. It’s a great post, and I highly recommend it.
+post](https://www.redblobgames.com/grids/hexagons/) that I used to
+understand the coordinate system for a hexagonal grid. It’s a great
+post, and I highly recommend it.
 
 If you wish to see the code, you can find it in the `generator.R` file.
 
@@ -73,16 +79,21 @@ plot(horizontal_grad, xlab = "Column", ylab = "Green probability")
 Let’s visualize what this would look like as a wall panel:
 
 ``` r
-wall <- create_matrix_binom(matrix(data = 0, nrow = n_row, ncol = n_col), horizontal_grad, gain = 0.2)
+wall <- create_matrix_binom(
+    matrix(data = 0, nrow = n_row, ncol = n_col), 
+    horizontal_grad, 
+    gain = 0.2,
+    seed = 13   # Using a fixed seed allows generating the same panel every time
+    )
 
 draw_panel(wall, 10)
 ```
 
 ![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
 
-It’s not bad at all! But I want to add some "organic" look to it. To do so,
-I will use the **perlin noise** algorithm to add additional variation to the hexagon distribution. 
-This algorithm generates a matrix of spatially correlated
+It’s not bad at all! But I want to add some randomness to it. To do so,
+I will use the **perlin noise** algorithm to increase the variability of
+the panel. This algorithm generates a matrix of spatially correlated
 random numbers. This means that the probability matrix will have some
 terrain-like properties, and there will be “spots” where the probability
 of coloring is higher than others.
@@ -108,7 +119,7 @@ towards white. As for the radius of the edge hexagons, I decided that if
 considered an edge hexagon, with a smaller radius.
 
 ``` r
-wall <- create_matrix_binom(noise, horizontal_grad, gain = 0.05)
+wall <- create_matrix_binom(noise, horizontal_grad, gain = 0.05, seed = 13)
 
 draw_panel(wall, hex_radius = 10, missing_neighbors = 3)
 ```
@@ -158,3 +169,40 @@ draw_panel(wall, hex_radius = 10, missing_neighbors = 3, color = colors)
 ```
 
 ![](README_files/figure-commonmark/unnamed-chunk-7-1.png)
+
+### Other examples of panels
+
+All of these panels are generated from the same distributions, but you
+could create your own
+
+``` r
+wall1 <- create_matrix_binom(noise, horizontal_grad, gain = 1, seed = 13)
+draw_panel(wall1, hex_radius = 10, missing_neighbors = 3, color = "#60AA20")
+title("Increase bias towards green")
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-8-1.png)
+
+``` r
+wall2 <- create_matrix_binom(noise, horizontal_grad, gain = 0.05, seed = 20)
+draw_panel(wall2, hex_radius = 9, missing_neighbors = 3, color = "#60AA20")
+title("Use another seed")
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-8-2.png)
+
+``` r
+wall3 <- create_matrix_binom(noise, rep(0.5,n_col), gain = 0.3, seed = 13)
+draw_panel(wall3, hex_radius = 10, missing_neighbors = 3, color = "#60AA20")
+title("No horizontal gradient")
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-8-3.png)
+
+### TODO
+
+- The `create_matrix_binom` function could be improved to allow for more
+  flexibility in the distribution of the probabilities. Instead of
+  accepting a fixed number of distributions, it should accept a variable
+  number of matrices with the same distribution, plus a vector of
+  weights.
